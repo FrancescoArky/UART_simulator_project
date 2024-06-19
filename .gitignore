@@ -1,0 +1,6 @@
+//files that will be ignored by Git
+
+venv/
+.venv/
+__pycache__/
+*.pyc
