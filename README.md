@@ -5,3 +5,6 @@ For the proper functioning of the project it has been necessary to use as well t
 - On the main page select "Start emulation" and "Start/Stop HTTP Server"
 
 - Run main.py
+
+
+The .exe file is located inside the "dist" folder
