@@ -1,5 +1,6 @@
-import serial
+import tkinter as tk
 import threading
+import serial
 import time
 from gui import MainWindow, update_circle_color
 
@@ -76,12 +77,16 @@ def print_messages_periodically():
             print(f"Dati ricevuti da COM2: {formatted_messages}")
             messages_received = []
 
-if __name__ == "__main__":
+def main():
     ser_send, ser_receive = open_serial_ports()
 
-    app = MainWindow(lambda command: send_command(ser_send, command), lambda: request_state(app.circle_buttons))
+    root = tk.Tk()
+    root.title("Simulatore Seriale")
 
-    receive_thread = threading.Thread(target=receive_data, args=(ser_receive, app.circle_buttons))
+    main_window = MainWindow(root, lambda command: send_command(ser_send, command), lambda: request_state(main_window.circle_buttons))
+    main_window.pack(expand=True, fill=tk.BOTH)
+
+    receive_thread = threading.Thread(target=receive_data, args=(ser_receive, main_window.circle_buttons))
     receive_thread.daemon = True
     receive_thread.start()
 
@@ -89,4 +94,7 @@ if __name__ == "__main__":
     print_thread.daemon = True
     print_thread.start()
 
-    app.mainloop()
+    root.mainloop()
+
+if __name__ == "__main__":
+    main()
