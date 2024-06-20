@@ -1,18 +1,18 @@
 import serial
 import threading
+import time
 from gui import MainWindow, update_circle_color
 
 port_name_send = 'COM1'  # Porta seriale per inviare dati
 port_name_receive = 'COM2'  # Porta seriale per ricevere dati
 baud_rate = 9600  # Baud rate
 
+messages_sent = []
+messages_received = []
+
 def open_serial_ports():
-    """
-    Apre le porte seriali per l'invio e la ricezione dei dati.
-    """
     try:
         ser_send = serial.Serial(port_name_send, baud_rate, timeout=1)
-        ser_send.flush()  # Flush della porta seriale per l'invio
         print(f'Porta seriale {port_name_send} aperta per invio')
     except serial.SerialException as e:
         print(f'Errore durante l\'apertura della porta seriale {port_name_send}: {e}')
@@ -20,7 +20,6 @@ def open_serial_ports():
 
     try:
         ser_receive = serial.Serial(port_name_receive, baud_rate, timeout=1)
-        ser_receive.flush()  # Flush della porta seriale per la ricezione
         print(f'Porta seriale {port_name_receive} aperta per ricezione')
     except serial.SerialException as e:
         print(f'Errore durante l\'apertura della porta seriale {port_name_receive}: {e}')
@@ -31,41 +30,63 @@ def open_serial_ports():
     return ser_send, ser_receive
 
 def send_command(ser_send, command):
-    """
-    Invia un comando attraverso la porta seriale specificata.
-    """
     if ser_send:
         try:
             ser_send.write(command.encode())
-            ser_send.flush()  # Flush per garantire che i dati siano inviati immediatamente
-            print(f'Comando inviato: {command}')
+            global messages_sent
+            messages_sent.append(command)
         except serial.SerialException as e:
             print(f'Errore durante l\'invio del comando sulla porta {port_name_send}: {e}')
 
-def receive_data(ser_receive):
-    """
-    Gestisce la ricezione dei dati attraverso la porta seriale specificata.
-    """
+def receive_data(ser_receive, circle_buttons):
+    global messages_received
     if ser_receive:
         try:
             while True:
                 if ser_receive.in_waiting > 0:
                     data = ser_receive.readline().decode().strip()
-                    print(f'Dati ricevuti da {port_name_receive}: LED{data[3]} {data[4]}')
+                    messages_received.append(data)
 
                     if data.startswith("LED"):
-                        led_number = int(data[3])
-                        led_state = int(data[4])
-                        update_circle_color(led_number, "ON" if led_state == 1 else "OFF")
+                        led_number = data[3]
+                        led_state = data[5]
+                        update_circle_color(int(led_number), "ON" if led_state == '1' else "OFF", circle_buttons)
         except serial.SerialException as e:
             print(f'Errore durante la ricezione dei dati sulla porta {port_name_receive}: {e}')
+
+def request_state(circle_buttons):
+    states = []
+    for button in circle_buttons:
+        state = "ON" if button.current_color == "green" else "OFF"
+        states.append(f'LED{button.index} {state}')
+    print(" ".join(states))
+
+def print_messages_periodically():
+    global messages_sent, messages_received
+    while True:
+        time.sleep(1)
+        if messages_sent:
+            print("Messaggi inviati: " + " / ".join(messages_sent))
+            messages_sent = []
+        else:
+            print("Comunicazione aperta")
+        
+        if messages_received:
+            formatted_messages = " / ".join(messages_received)
+            print(f"Dati ricevuti da COM2: {formatted_messages}")
+            messages_received = []
 
 if __name__ == "__main__":
     ser_send, ser_receive = open_serial_ports()
 
-    receive_thread = threading.Thread(target=receive_data, args=(ser_receive,))
+    app = MainWindow(lambda command: send_command(ser_send, command), lambda: request_state(app.circle_buttons))
+
+    receive_thread = threading.Thread(target=receive_data, args=(ser_receive, app.circle_buttons))
     receive_thread.daemon = True
     receive_thread.start()
 
-    app = MainWindow(lambda command: send_command(ser_send, command))
+    print_thread = threading.Thread(target=print_messages_periodically)
+    print_thread.daemon = True
+    print_thread.start()
+
     app.mainloop()

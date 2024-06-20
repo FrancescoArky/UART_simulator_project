@@ -14,40 +14,40 @@ class CircleButton(tk.Canvas):
     def on_click(self, event):
         if self.current_color == "gray":
             self.current_color = "green"
-            command = f'LED{self.index}1'
+            command = f'LED{self.index} 1'
             print(f'Pulsante {self.index} premuto')
         elif self.current_color == "green":
             self.current_color = "red"
-            command = f'LED{self.index}0'
+            command = f'LED{self.index} 0'
             print(f'Pulsante {self.index} rilasciato')
         else:
             self.current_color = "green"
-            command = f'LED{self.index}1'
+            command = f'LED{self.index} 1'
             print(f'Pulsante {self.index} premuto nuovamente')
         self.itemconfig(self.circle, fill=self.current_color)
         self.send_command(command)
 
-def update_circle_color(index, state):
+def update_circle_color(index, state, circle_buttons):
     color = "green" if state == "ON" else "red"
-    for widget in tk._default_root.children.values():
-        if isinstance(widget, CircleButton) and widget.index == index:
-            widget.itemconfig(widget.circle, fill=color)
+    for button in circle_buttons:
+        if button.index == index:
+            button.itemconfig(button.circle, fill=color)
+
+class StateButton(tk.Button):
+    def __init__(self, master, request_state):
+        super().__init__(master, text="Richiedi Stato", command=request_state)
+        self.grid(row=1, column=0, columnspan=4, pady=10)
 
 class MainWindow(tk.Tk):
-    def __init__(self, send_command):
+    def __init__(self, send_command, request_state):
         super().__init__()
+
         self.title("Applicazione Principale")
         self.geometry("400x150")
 
         self.circle_buttons = []
         for i in range(1, 5):
             button = CircleButton(self, i, send_command)
-            button.grid(row=0, column=i - 1, padx=10, pady=10)
             self.circle_buttons.append(button)
 
-        self.state_button = tk.Button(self, text="Richiedi Stato", command=self.request_state)
-        self.state_button.grid(row=1, column=0, columnspan=4, pady=10)
-
-    def request_state(self):
-        states = [f'Pulsante {btn.index}: {"Premuto" if btn.current_color == "green" else "Non Premuto"}' for btn in self.circle_buttons]
-        print("\n".join(states))
+        self.state_button = StateButton(self, request_state)
