@@ -67,14 +67,15 @@ def print_messages_periodically():
     while True:
         time.sleep(1)
         if messages_sent:
-            print("Messaggi inviati: " + " / ".join(messages_sent))
+            for message in messages_sent:
+                print(f"Messaggio inviato: {message}")
             messages_sent = []
         else:
             print("Comunicazione aperta")
         
         if messages_received:
-            formatted_messages = " / ".join(messages_received)
-            print(f"Dati ricevuti da COM2: {formatted_messages}")
+            for message in messages_received:
+                print(f"Dato ricevuto da COM2: {message}")
             messages_received = []
 
 def main():
