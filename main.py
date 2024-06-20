@@ -4,23 +4,28 @@ import serial
 import time
 from gui import MainWindow
 
-port_name_send = 'COM1'  # Porta seriale per inviare dati
-port_name_receive = 'COM2'  # Porta seriale per ricevere dati
+port_name_send = 'COM1'  # Serial door for the data sending
+port_name_receive = 'COM2'  # Serial door for the data receiving
 baud_rate = 9600  # Baud rate
 
 def open_serial_ports():
+
+    """
+    Such function is responsible for opening the two communication doors for the sending and receiving procedures
+    """
+
     try:
         ser_send = serial.Serial(port_name_send, baud_rate, timeout=1)
-        print(f'Porta seriale {port_name_send} aperta per invio')
+        print(f'Serial door {port_name_send} open for message sendings')
     except serial.SerialException as e:
-        print(f'Errore durante l\'apertura della porta seriale {port_name_send}: {e}')
+        print(f'Error during the opening of the serial door {port_name_send}: {e}')
         exit(1)
 
     try:
         ser_receive = serial.Serial(port_name_receive, baud_rate, timeout=1)
-        print(f'Porta seriale {port_name_receive} aperta per ricezione')
+        print(f'Serial door {port_name_receive} open for message receiving')
     except serial.SerialException as e:
-        print(f'Errore durante l\'apertura della porta seriale {port_name_receive}: {e}')
+        print(f'Error during the opening of the serial door {port_name_receive}: {e}')
         if ser_send:
             ser_send.close()
         exit(1)
@@ -28,17 +33,25 @@ def open_serial_ports():
     return ser_send, ser_receive
 
 def send_command(ser_send, command):
+    """
+    In case a message is sent then this function will print said message
+    """
     if ser_send:
         try:
             ser_send.write(command.encode())
-            print(f"Messaggio inviato: {command}")  # Stampa direttamente il messaggio inviato
+            print(f"Message sent: {command}")
         except serial.SerialException as e:
-            print(f'Errore durante l\'invio del comando sulla porta {port_name_send}: {e}')
+            print(f'Error during the sending of the command on the door {port_name_send}: {e}')
 
 def print_messages_periodically():
+
+    """
+    In case there are no messages sent this function will print a message periodically to show that the communication is still active
+    """
+
     while True:
-        time.sleep(1)  # Attendi un secondo
-        print("Comunicazione aperta")
+        time.sleep(1)
+        print("Communication open")
 
 def request_state(circle_buttons):
     print("LED states:")
@@ -48,7 +61,7 @@ def request_state(circle_buttons):
 
 
 def main():
-    ser_send, _ = open_serial_ports()  # Non è necessario ricevere dati in questo esempio
+    ser_send, ser_receive = open_serial_ports()
 
     root = tk.Tk()
     root.title("Simulatore Seriale")
