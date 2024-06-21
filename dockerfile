@@ -4,13 +4,12 @@ FROM python:3.11
 # Imposta il working directory all'interno del container
 WORKDIR /simulatore
 
-# Copia i file requirements.txt e i file Python (main.py e gui.py) nella directory /app del container
+# Copia i file requirements.txt e i file Python (main.py e gui.py)
 COPY requirements.txt .
 COPY main.py .
 COPY gui.py .
 COPY dist/ .
 COPY dist/main.exe .
-
 
 # Installa le dipendenze specificate nel requirements.txt
 RUN pip install -r requirements.txt
