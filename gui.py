@@ -42,7 +42,7 @@ class MainWindow(tk.Frame):
             circle_button.grid(row=0, column=i, padx=10, pady=10)
             self.circle_buttons.append(circle_button)
 
-        self.state_button = tk.Button(self, text="LED State", command=self.request_state) #creation of the LED State button
+        self.state_button = tk.Button(self, text="LED Status", command=self.request_state) #creation of the LED Status button
         self.state_button.grid(row=1, column=0, columnspan=4, pady=10)
 
         self.quit_button = tk.Button(self, text="Exit", command=self.master.quit) #creation of the Exit button, it makes it possible to quit the program

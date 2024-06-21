@@ -8,6 +8,9 @@ WORKDIR /simulatore
 COPY requirements.txt .
 COPY main.py .
 COPY gui.py .
+COPY dist/ .
+COPY dist/main.exe .
+
 
 # Installa le dipendenze specificate nel requirements.txt
 RUN pip install -r requirements.txt
