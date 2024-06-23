@@ -1,6 +1,6 @@
-//requirements to be installed before running the program
+##requirements to be installed before running the program
 
 pyserial==3.5
 tk==0.1.0
 
-//all of these can be installed through the command pip install -r requirements.txt
+##all of these can be installed through the command pip install -r requirements.txt
